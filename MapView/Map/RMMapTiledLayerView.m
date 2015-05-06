@@ -120,7 +120,7 @@
                 for (int y=y1; y<=y2; ++y)
                 {
                     UIImage *tileImage = [_tileSource imageForTile:RMTileMake(x, y, zoom) inCache:[_mapView tileCache]];
-
+ 
                     if (IS_VALID_TILE_IMAGE(tileImage))
                         [tileImage drawInRect:CGRectMake(x * rectSize, y * rectSize, rectSize, rectSize)];
                 }
@@ -140,8 +140,6 @@
             x >>= 1;
             y >>= 1;
         }
-
-//        NSLog(@"Tile @ x:%d, y:%d, zoom:%d", x, y, zoom);
 
         UIGraphicsPushContext(context);
 

@@ -45,6 +45,7 @@
 }
 
 @synthesize cacheable = _cacheable, opaque = _opaque;
+@synthesize centerMapQuarter = _centerMapQuarter;
 
 - (id)initWithTileSetResource:(NSString *)name ofType:(NSString *)extension
 {
@@ -93,9 +94,10 @@
 			  self, tile.zoom, self.minZoom, self.maxZoom);
 
     NSInteger zoom = tile.zoom;
-    NSInteger x    = tile.x;
+    NSInteger x    = (int)(tile.x + pow(2, zoom) * ((double)_centerMapQuarter / 4.0f)) % (int)pow(2, zoom);
+    x = x < 0 ? x + (int)pow(2, zoom) : x;
     NSInteger y    = pow(2, zoom) - tile.y - 1;
-
+    
     dispatch_async(dispatch_get_main_queue(), ^(void)
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:RMTileRequested object:[NSNumber numberWithUnsignedLongLong:RMTileKey(tile)]];

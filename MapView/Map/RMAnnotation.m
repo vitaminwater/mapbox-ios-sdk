@@ -95,8 +95,8 @@
 - (void)setCoordinate:(CLLocationCoordinate2D)aCoordinate
 {
     coordinate = aCoordinate;
-    self.projectedLocation = [[mapView projection] coordinateToProjectedPoint:aCoordinate];
-    self.position = [mapView projectedPointToPixel:self.projectedLocation];
+    self.projectedLocation = [mapView coordinateToProjectedPoint:aCoordinate];
+    [self setPosition:[mapView projectedPointToPixel:self.projectedLocation] animated:NO];
 
     if (!self.hasBoundingBox)
         self.projectedBoundingBox = RMProjectedRectMake(self.projectedLocation.x, self.projectedLocation.y, 1.0, 1.0);
@@ -193,8 +193,8 @@
 
 - (void)setBoundingBoxCoordinatesSouthWest:(CLLocationCoordinate2D)southWest northEast:(CLLocationCoordinate2D)northEast
 {
-    RMProjectedPoint first = [[mapView projection] coordinateToProjectedPoint:southWest];
-    RMProjectedPoint second = [[mapView projection] coordinateToProjectedPoint:northEast];
+    RMProjectedPoint first = [mapView coordinateToProjectedPoint:southWest];
+    RMProjectedPoint second = [mapView coordinateToProjectedPoint:northEast];
     self.projectedBoundingBox = RMProjectedRectMake(first.x, first.y, second.x - first.x, second.y - first.y);
     self.hasBoundingBox = YES;
 }

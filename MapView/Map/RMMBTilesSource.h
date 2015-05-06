@@ -48,6 +48,8 @@
     FMDatabaseQueue *queue;
 }
 
+@property(nonatomic, assign)NSInteger centerMapQuarter;
+
 /** @name Creating Tile Sources */
 
 /** Initialize and return a newly allocated MBTiles tile source based on a given bundle resource.

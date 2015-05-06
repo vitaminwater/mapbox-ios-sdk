@@ -42,6 +42,7 @@
 #import "RMTileCache.h"
 #import "RMTileSource.h"
 #import "RMMapBoxSource.h"
+#import "RMMBTilesSource.h"
 
 #import "RMMapTiledLayerView.h"
 #import "RMMapOverlayView.h"
@@ -531,8 +532,8 @@
     _delegateHasSingleTapTwoFingersOnMap = [_delegate respondsToSelector:@selector(singleTapTwoFingersOnMap:at:)];
     _delegateHasLongPressOnMap = [_delegate respondsToSelector:@selector(longPressOnMap:at:)];
 
-    _delegateHasTapOnAnnotation = [_delegate respondsToSelector:@selector(tapOnAnnotation:onMap:)];
-    _delegateHasDoubleTapOnAnnotation = [_delegate respondsToSelector:@selector(doubleTapOnAnnotation:onMap:)];
+    _delegateHasTapOnAnnotation = [_delegate respondsToSelector:@selector(tapOnAnnotation:onMap:atPoint:)];
+    _delegateHasDoubleTapOnAnnotation = [_delegate respondsToSelector:@selector(doubleTapOnAnnotation:onMap:atPoint:)];
     _delegateHasLongPressOnAnnotation = [_delegate respondsToSelector:@selector(longPressOnAnnotation:onMap:)];
     _delegateHasTapOnCalloutAccessoryControlForAnnotation = [_delegate respondsToSelector:@selector(tapOnCalloutAccessoryControl:forAnnotation:onMap:)];
     _delegateHasTapOnLabelForAnnotation = [_delegate respondsToSelector:@selector(tapOnLabelForAnnotation:onMap:)];
@@ -705,11 +706,7 @@
     myOrigin.x = myOrigin.x - (zoomRect.size.width / 2);
     myOrigin.y = myOrigin.y - (zoomRect.size.height / 2);
 
-    RMLog(@"Origin is calculated at: %f, %f", [_projection projectedPointToCoordinate:myOrigin].longitude, [_projection projectedPointToCoordinate:myOrigin].latitude);
-
     zoomRect.origin = myOrigin;
-
-//    RMLog(@"Origin: x=%f, y=%f, w=%f, h=%f", zoomRect.origin.easting, zoomRect.origin.northing, zoomRect.size.width, zoomRect.size.height);
 
     return zoomRect;
 }
@@ -1581,9 +1578,9 @@
     CALayer *superlayer = [hit superlayer];
 
     // See if tap was on a marker or marker label and send delegate protocol method
-    if ([hit isKindOfClass:[RMMarker class]])
+    if ([hit isKindOfClass:[RMMarker class]] || [hit isKindOfClass:[RMShape class]])
     {
-        [self doubleTapOnAnnotation:[((RMMarker *)hit) annotation] atPoint:[recognizer locationInView:self]];
+        [self doubleTapOnAnnotation:[((RMMapLayer *)hit) annotation] atPoint:[recognizer locationInView:self]];
     }
     else if (superlayer != nil && [superlayer isKindOfClass:[RMMarker class]])
     {
@@ -1709,7 +1706,7 @@
 
     if (_delegateHasTapOnAnnotation && anAnnotation)
     {
-        [_delegate tapOnAnnotation:anAnnotation onMap:self];
+        [_delegate tapOnAnnotation:anAnnotation onMap:self atPoint:aPoint];
     }
     else
     {
@@ -1843,7 +1840,7 @@
 {
     if (_delegateHasDoubleTapOnAnnotation && anAnnotation)
     {
-        [_delegate doubleTapOnAnnotation:anAnnotation onMap:self];
+        [_delegate doubleTapOnAnnotation:anAnnotation onMap:self atPoint:aPoint];
     }
     else
     {
@@ -1859,7 +1856,7 @@
     }
     else if (_delegateHasTapOnAnnotation && anAnnotation)
     {
-        [_delegate tapOnAnnotation:anAnnotation onMap:self];
+        [_delegate tapOnAnnotation:anAnnotation onMap:self atPoint:aPoint];
     }
     else
     {
@@ -1876,7 +1873,7 @@
     }
     else if (_delegateHasDoubleTapOnAnnotation && anAnnotation)
     {
-        [_delegate doubleTapOnAnnotation:anAnnotation onMap:self];
+        [_delegate doubleTapOnAnnotation:anAnnotation onMap:self atPoint:aPoint];
     }
     else
     {

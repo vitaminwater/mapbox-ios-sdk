@@ -72,7 +72,13 @@
 
 - (void)setPosition:(CGPoint)position animated:(BOOL)animated
 {
-    [self setPosition:position];
+    if (animated == NO) {
+        [CATransaction begin];
+        [CATransaction setValue: (id) kCFBooleanTrue forKey: kCATransactionDisableActions];
+        self.position = position;
+        [CATransaction commit];
+    } else
+        self.position = position;
 }
 
 /// return nil for certain animation keys to block core animation

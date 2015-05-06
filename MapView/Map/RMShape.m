@@ -283,7 +283,9 @@
 
 - (void)addCurveToProjectedPoint:(RMProjectedPoint)point controlPoint1:(RMProjectedPoint)controlPoint1 controlPoint2:(RMProjectedPoint)controlPoint2 withDrawing:(BOOL)isDrawing
 {
-    [points addObject:[[CLLocation alloc] initWithLatitude:[mapView projectedPointToCoordinate:point].latitude longitude:[mapView projectedPointToCoordinate:point].longitude]];
+    CLLocationCoordinate2D newLocation = [mapView projectedPointToCoordinate:point];
+
+    [points addObject:[[CLLocation alloc] initWithLatitude:newLocation.latitude longitude:newLocation.longitude]];
 
     if (isFirstPoint)
     {
@@ -353,7 +355,7 @@
 
 - (void)moveToCoordinate:(CLLocationCoordinate2D)coordinate
 {
-    RMProjectedPoint mercator = [[mapView projection] coordinateToProjectedPoint:coordinate];
+    RMProjectedPoint mercator = [mapView coordinateToProjectedPoint:coordinate];
     [self moveToProjectedPoint:mercator];
 }
 
@@ -373,16 +375,16 @@
 
 - (void)addLineToCoordinate:(CLLocationCoordinate2D)coordinate
 {
-    RMProjectedPoint mercator = [[mapView projection] coordinateToProjectedPoint:coordinate];
+    RMProjectedPoint mercator = [mapView coordinateToProjectedPoint:coordinate];
     [self addLineToProjectedPoint:mercator];
 }
 
 - (void)addCurveToCoordinate:(CLLocationCoordinate2D)coordinate controlCoordinate1:(CLLocationCoordinate2D)controlCoordinate1 controlCoordinate2:(CLLocationCoordinate2D)controlCoordinate2
 {
-    RMProjectedPoint projectedPoint = [[mapView projection] coordinateToProjectedPoint:coordinate];
+    RMProjectedPoint projectedPoint = [mapView coordinateToProjectedPoint:coordinate];
 
-    RMProjectedPoint controlProjectedPoint1 = [[mapView projection] coordinateToProjectedPoint:controlCoordinate1];
-    RMProjectedPoint controlProjectedPoint2 = [[mapView projection] coordinateToProjectedPoint:controlCoordinate2];
+    RMProjectedPoint controlProjectedPoint1 = [mapView coordinateToProjectedPoint:controlCoordinate1];
+    RMProjectedPoint controlProjectedPoint2 = [mapView coordinateToProjectedPoint:controlCoordinate2];
 
     [self addCurveToProjectedPoint:projectedPoint
             controlProjectedPoint1:controlProjectedPoint1
@@ -391,9 +393,9 @@
 
 - (void)addQuadCurveToCoordinate:(CLLocationCoordinate2D)coordinate controlCoordinate:(CLLocationCoordinate2D)controlCoordinate
 {
-    RMProjectedPoint projectedPoint = [[mapView projection] coordinateToProjectedPoint:coordinate];
+    RMProjectedPoint projectedPoint = [mapView coordinateToProjectedPoint:coordinate];
 
-    RMProjectedPoint controlProjectedPoint = [[mapView projection] coordinateToProjectedPoint:controlCoordinate];
+    RMProjectedPoint controlProjectedPoint = [mapView coordinateToProjectedPoint:controlCoordinate];
 
     [self addQuadCurveToProjectedPoint:projectedPoint
                  controlProjectedPoint:controlProjectedPoint];
