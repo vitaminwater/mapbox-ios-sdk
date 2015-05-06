@@ -45,6 +45,7 @@
 }
 
 @synthesize cacheable = _cacheable, opaque = _opaque;
+@synthesize centerMapQuarter = _centerMapQuarter;
 
 - (id)initWithTileSetResource:(NSString *)name
 {
@@ -99,10 +100,18 @@
 			  @"%@ tried to retrieve tile with zoomLevel %d, outside source's defined range %f to %f", 
 			  self, tile.zoom, self.minZoom, self.maxZoom);
 
+/*<<<<<<< HEAD
     NSUInteger zoom = tile.zoom;
     NSUInteger x    = tile.x;
     NSUInteger y    = pow(2, zoom) - tile.y - 1;
 
+=======*/
+    NSInteger zoom = tile.zoom;
+    NSInteger x    = (int)(tile.x + pow(2, zoom) * ((double)_centerMapQuarter / 4.0f)) % (int)pow(2, zoom);
+    x = x < 0 ? x + (int)pow(2, zoom) : x;
+    NSInteger y    = pow(2, zoom) - tile.y - 1;
+    
+//>>>>>>> stant
     dispatch_async(dispatch_get_main_queue(), ^(void)
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:RMTileRequested object:[NSNumber numberWithUnsignedLongLong:RMTileKey(tile)]];

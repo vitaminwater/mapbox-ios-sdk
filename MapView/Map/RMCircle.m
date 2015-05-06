@@ -87,7 +87,7 @@
 
     CGMutablePathRef newPath = CGPathCreateMutable();
 
-    CGFloat latRadians = [[mapView projection] projectedPointToCoordinate:projectedLocation].latitude * M_PI / 180.0f;
+    CGFloat latRadians = [mapView projectedPointToCoordinate:projectedLocation].latitude * M_PI / 180.0f;
     CGFloat pixelRadius = radiusInMeters / cos(latRadians) / [mapView metersPerPixel];
     //	DLog(@"Pixel Radius: %f", pixelRadius);
 
