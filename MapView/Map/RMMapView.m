@@ -150,6 +150,8 @@
     BOOL _delegateHasDoubleTapOnLabelForAnnotation;
     BOOL _delegateHasShouldDragAnnotation;
     BOOL _delegateHasDidChangeDragState;
+    BOOL _delegateHasDidEndDragAnnotation;
+    BOOL _delegateHasDidDragAnnotationWithDelta;
     BOOL _delegateHasLayerForAnnotation;
     BOOL _delegateHasAnnotationSorting;
     BOOL _delegateHasWillHideLayerForAnnotation;
@@ -190,6 +192,7 @@
 
     RMAnnotation *_draggedAnnotation;
     CGPoint _dragOffset;
+    CGPoint _lastDragPosition;
 
     CLLocationManager *_locationManager;
 
@@ -710,6 +713,9 @@
 
     _delegateHasShouldDragAnnotation = [_delegate respondsToSelector:@selector(mapView:shouldDragAnnotation:)];
     _delegateHasDidChangeDragState = [_delegate respondsToSelector:@selector(mapView:annotation:didChangeDragState:fromOldState:)];
+    
+    _delegateHasDidEndDragAnnotation = [_delegate respondsToSelector:@selector(mapView:didEndDragAnnotation:)];
+    _delegateHasDidDragAnnotationWithDelta = [_delegate respondsToSelector:@selector(mapView:didDragAnnotation:withDelta:)];
 
     _delegateHasLayerForAnnotation = [_delegate respondsToSelector:@selector(mapView:layerForAnnotation:)];
     _delegateHasAnnotationSorting = [_delegate respondsToSelector:@selector(annotationSortingComparatorForMapView:)];
@@ -1781,7 +1787,7 @@
 
 - (void)handleLongPress:(UILongPressGestureRecognizer *)recognizer
 {
-    if ( ! _delegateHasLongPressOnMap && ! _delegateHasLongPressOnAnnotation && ! _delegateHasShouldDragAnnotation)
+    if ( ! _delegateHasLongPressOnMap && ! _delegateHasLongPressOnAnnotation && ! _delegateHasShouldDragAnnotation && !_delegateHasDidDragAnnotationWithDelta && ! _delegateHasDidEndDragAnnotation)
         return;
 
     CALayer *hit = _draggedAnnotation.layer;
@@ -1808,7 +1814,8 @@
 
             // remember where in the layer the gesture occurred
             //
-            _dragOffset = [_draggedAnnotation.layer convertPoint:[recognizer locationInView:self] fromLayer:self.layer];
+            _lastDragPosition = [recognizer locationInView:self];
+            _dragOffset = [_draggedAnnotation.layer convertPoint:_lastDragPosition fromLayer:self.layer];
 
             // inform the layer
             //
@@ -1825,11 +1832,18 @@
             [CATransaction begin];
             [CATransaction setDisableActions:YES];
 
-            CGSize layerSize = _draggedAnnotation.layer.bounds.size;
             CGPoint gesturePoint = [recognizer locationInView:self];
-            CGPoint newPosition = CGPointMake(gesturePoint.x + ((layerSize.width / 2) - _dragOffset.x), gesturePoint.y + ((layerSize.height / 2) - _dragOffset.y));
 
-            _draggedAnnotation.position = newPosition;
+            if (_draggedAnnotation.legacyDrag) {
+                CGPoint delta = CGPointMake(gesturePoint.x - _lastDragPosition.x, gesturePoint.y - _lastDragPosition.y);
+                if ([_delegate respondsToSelector:@selector(mapView:didDragAnnotation:withDelta:)])
+                    [_delegate mapView:self didDragAnnotation:_draggedAnnotation withDelta:delta];
+            } else {
+                CGSize layerSize = _draggedAnnotation.layer.bounds.size;
+                CGPoint newPosition = CGPointMake(gesturePoint.x + ((layerSize.width / 2) - _dragOffset.x), gesturePoint.y + ((layerSize.height / 2) - _dragOffset.y));
+                _draggedAnnotation.position = newPosition;
+            }
+            _lastDragPosition = gesturePoint;
 
             [CATransaction commit];
         }
@@ -1839,8 +1853,12 @@
             //
             [_draggedAnnotation.layer setDragState:RMMapLayerDragStateCanceling animated:YES];
 
-            _draggedAnnotation.position = [self coordinateToPixel:_draggedAnnotation.coordinate];
+            if (_draggedAnnotation.legacyDrag == NO) {
+                _draggedAnnotation.position = [self coordinateToPixel:_draggedAnnotation.coordinate];
+            }
 
+            if ([_delegate respondsToSelector:@selector(mapView:didEndDragAnnotation:)])
+                [_delegate mapView:self didEndDragAnnotation:_draggedAnnotation];
             [self correctOrderingOfAllAnnotations];
 
             _draggedAnnotation = nil;
@@ -1851,8 +1869,12 @@
             //
             [_draggedAnnotation.layer setDragState:RMMapLayerDragStateEnding animated:YES];
 
-            _draggedAnnotation.coordinate = [self pixelToCoordinate:_draggedAnnotation.position];
+            if (_draggedAnnotation.legacyDrag == NO) {
+                _draggedAnnotation.coordinate = [self pixelToCoordinate:_draggedAnnotation.position];
+            }
 
+            if ([_delegate respondsToSelector:@selector(mapView:didEndDragAnnotation:)])
+                [_delegate mapView:self didEndDragAnnotation:_draggedAnnotation];
             [self correctOrderingOfAllAnnotations];
 
             _draggedAnnotation = nil;

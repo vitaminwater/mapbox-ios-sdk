@@ -217,8 +217,12 @@ typedef enum : NSUInteger {
 *   @param oldState The previous drag state of the annotation layer. */
 - (void)mapView:(RMMapView *)mapView annotation:(RMAnnotation *)annotation didChangeDragState:(RMMapLayerDragState)newState fromOldState:(RMMapLayerDragState)oldState;
 
-/** @name Tracking the User Location */
+// backward compatibility
+- (void)mapView:(RMMapView *)map didDragAnnotation:(RMAnnotation *)annotation withDelta:(CGPoint)delta;
+- (void)mapView:(RMMapView *)map didEndDragAnnotation:(RMAnnotation *)annotation;
 
+/** @name Tracking the User Location */
+    
 /** Tells the delegate that the map view will start tracking the user’s position.
 *
 *   This method is called when the value of the showsUserLocation property changes to YES.

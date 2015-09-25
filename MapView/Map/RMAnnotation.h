@@ -59,6 +59,8 @@
 
 /** @name Configuration Basic Annotation Properties */
 
+@property (nonatomic, assign) BOOL legacyDrag;
+
 /** The annotation's location on the map. */
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
 

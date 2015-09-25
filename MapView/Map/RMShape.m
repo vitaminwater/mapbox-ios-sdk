@@ -51,7 +51,7 @@
 @synthesize lineDashLengths;
 @synthesize scaleLineDash;
 @synthesize shadowBlur;
-@synthesize shadowOffset;
+//@synthesize shadowOffset;
 @synthesize enableShadow;
 @synthesize pathBoundingBox;
 
